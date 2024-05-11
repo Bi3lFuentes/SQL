@@ -1,0 +1,82 @@
+-- comandos de criação:
+CREATE TABLE Cliente (codcliente int, nomcliente varchar(50), telefone int, PRIMARY KEY (codcliente));
+
+CREATE TABLE Pedidos(codpedidos int, descrição varchar(100), PRIMARY KEY (codpedidos));
+
+CREATE TABLE Autor(codautor int, nomeautor varchar(50), nacionalidade varchar(20), PRIMARY KEY (codautor));
+
+CREATE TABLE Editora (codedit int, nomeedit varchar (30), PRIMARY KEY(codedit));
+
+CREATE TABLE Livro(codlivro int, titulo varchar(30), preco int,codedit int, PRIMARY KEY (codlivro), FOREIGN KEY (codedit) REFERENCES Editora (codedit));
+
+CREATE TABLE Itens_pedidos(qnt int, codpedidos int, codlivro int, PRIMARY KEY(codlivro, codpedidos), FOREIGN KEY (codlivro) REFERENCES Livro (codlivro), FOREIGN KEY (codpedidos) REFERENCES Pedidos (codpedidos));
+
+CREATE TABLE autor_livro(codautor int, codlivro int, PRIMARY KEY(codautor, codlivro), FOREIGN KEY (codautor) REFERENCES Autor(codautor), FOREIGN KEY (codlivro) REFERENCES Livro(codlivro));
+
+CREATE TABLE Faz(codcliente int, codpedidos int, PRIMARY KEY(codcliente, codpedidos), FOREIGN KEY(codcliente) REFERENCES Cliente(codcliente), FOREIGN KEY(codpedidos) REFERENCES Pedidos(codpedidos));
+
+-- comandos de inserção:
+-- Comandos de Inserção na Tabela Cliente
+INSERT INTO Cliente (codcliente, nomcliente, telefone) VALUES (1, 'João Silva', 123456);
+INSERT INTO Cliente (codcliente, nomcliente, telefone) VALUES (2, 'Maria Souza', 987654);
+INSERT INTO Cliente (codcliente, nomcliente, telefone) VALUES (3, 'Pedro Santos', 55555);
+INSERT INTO Cliente (codcliente, nomcliente, telefone) VALUES (4, 'henriue', 01010);
+
+-- Comandos de Inserção na Tabela Pedidos
+INSERT INTO Pedidos (codpedidos, descrição) VALUES (1, 'Pedido de livros');
+INSERT INTO Pedidos (codpedidos, descrição) VALUES (2, 'Pedido de revistas');
+INSERT INTO Pedidos (codpedidos, descrição) VALUES (3, 'Pedido de eletrônicos');
+INSERT INTO pedidos (codpedidos, descrição) VALUES (4, 'tudo');
+
+-- Comandos de Inserção na Tabela Autor
+INSERT INTO Autor (codautor, nomeautor, nacionalidade) VALUES (1, 'Machado de Assis', 'Brasileiro');
+INSERT INTO Autor (codautor, nomeautor, nacionalidade) VALUES (2, 'William Shakespeare', 'Inglês');
+INSERT INTO Autor (codautor, nomeautor, nacionalidade) VALUES (3, 'Jane Austen', 'Inglês');
+
+-- Comandos de Inserção na Tabela Editora
+INSERT INTO Editora (codedit, nomeedit) VALUES (1, 'Companhia das Letras');
+INSERT INTO Editora (codedit, nomeedit) VALUES (2, 'Penguin Random House');
+INSERT INTO Editora (codedit, nomeedit) VALUES (3, 'HarperCollins');
+
+-- Comandos de Inserção na Tabela Livro
+INSERT INTO Livro (codlivro, titulo, codedit) VALUES (1, 'Dom Casmurro', 1);
+INSERT INTO Livro (codlivro, titulo, codedit) VALUES (2, 'Hamlet', 2);
+INSERT INTO Livro (codlivro, titulo, codedit) VALUES (3, 'Orgulho e Preconceito', 3);
+INSERT INTO Livro (codlivro, titulo, codedit) VALUES (4, 'puts', 2);
+
+-- Comandos de Inserção na Tabela Itens_pedidos
+INSERT INTO Itens_pedidos (qnt, codpedidos, codlivro) VALUES (2, 1, 1);
+INSERT INTO Itens_pedidos (qnt, codpedidos, codlivro) VALUES (3, 2, 2);
+INSERT INTO Itens_pedidos (qnt, codpedidos, codlivro) VALUES (1, 3, 3);
+INSERT INTO itens_pedidos (codpedidos, codlivro, qnt) VALUES (4, 1, 1);
+INSERT INTO itens_pedidos (codpedidos, codlivro, qnt) VALUES (4, 2, 1);
+INSERT INTO itens_pedidos (codpedidos, codlivro, qnt) VALUES (4, 3, 1);
+
+-- Comandos de Inserção na Tabela autor_livro
+INSERT INTO autor_livro (codautor, codlivro) VALUES (1, 1);
+INSERT INTO autor_livro (codautor, codlivro) VALUES (2, 2);
+INSERT INTO autor_livro (codautor, codlivro) VALUES (3, 3);
+INSERT INTO autor_livro (codautor, codlivro) VALUES (2, 4);
+
+-- Comandos de Inserção na Tabela Faz
+INSERT INTO Faz (codcliente, codpedidos) VALUES (1, 1);
+INSERT INTO Faz (codcliente, codpedidos) VALUES (2, 2);
+INSERT INTO Faz (codcliente, codpedidos) VALUES (3, 3);
+INSERT INTO faz (codcliente, codpedidos) VALUES (2, 4)
+
+
+-- COMANDOS COM 3+ TABELAS
+SELECT nomcliente, descrição FROM Cliente, Faz, Pedidos WHERE Cliente.codcliente = Faz.codcliente and Pedidos.codpedidos = Faz.codpedidos;
+SELECT Pedidos.codpedidos, titulo FROM Pedidos, itens_pedidos, Livro WHERE Pedidos.codpedidos = itens_pedidos.codpedidos and Livro.codlivro = itens_pedidos.codlivro;
+
+-- COMANDOS COM 4+ TABELAS
+SELECT nomcliente, titulo FROM Cliente, Faz, Pedidos, itens_pedidos, Livro WHERE Cliente.codcliente = Faz.codcliente and Pedidos.codpedidos = Faz.codpedidos and Pedidos.codpedidos = itens_pedidos.codpedidos and Livro.codlivro = itens_pedidos.codlivro;
+SELECT titulo, nomeautor, nomeedit FROM Livro, autor_livro, Editora, Autor WHERE Livro.codedit = Editora.codedit and Livro.codlivro = autor_livro.codlivro and Autor.codautor = autor_livro.codautor;
+
+-- COMANDOS USANDO GROUP BY & HAVING 
+SELECT COUNT(codlivro), codedit FROM Livro GROUP BY codedit HAVING COUNT(codlivro) > 1;
+SELECT Cliente.codcliente, COUNT(Cliente.codcliente) FROM Cliente, Faz, Pedidos WHERE Cliente.codcliente = Faz.codcliente and Pedidos.codpedidos = Faz.codpedidos GROUP BY Cliente.codcliente HAVING COUNT(Cliente.codcliente) > 1;
+
+-- COMANDOS USANDO NOT IN
+SELECT * FROM Livro WHERE Livro.codlivro not in (SELECT codlivro FROM itens_pedidos);
+SELECT nomcliente FROM Cliente WHERE codcliente not in (SELECT codcliente FROM Faz);
